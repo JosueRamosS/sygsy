@@ -1,0 +1,562 @@
+{
+    "info": {
+        "_postman_id": "b8f7e5d4-1234-5678-9abc-def012345678",
+        "name": "SYGSY API (Completo)",
+        "description": "Colección completa del Backend con Auth, Usuarios y Workflow de Sílabos.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth & Users",
+            "item": [
+                {
+                    "name": "Login Admin (First Time)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"admin@ulasalle.edu.pe\",\n    \"password\": \"admin123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login Coordinador",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"rescobedo@ulasalle.edu.pe\",\n    \"password\": \"123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login Profesor",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"vmachacaa@ulasalle.edu.pe\",\n    \"password\": \"123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Registrar Coordinador",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"rescobedo@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Ricardo Escobedo\",\n    \"role\": \"COORDINATOR\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Registrar Profesor",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"vmachacaa@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Victor Machaca\",\n    \"role\": \"PROFESSOR\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar Usuarios",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/users",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "users"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Academic Periods",
+            "item": [
+                {
+                    "name": "Crear Periodo Académico",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"2025-I\",\n    \"startDate\": \"2025-03-01\",\n    \"endDate\": \"2025-07-31\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/academic-periods",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "academic-periods"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Listar Periodos Académicos",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/academic-periods",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "academic-periods"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Syllabus Workflow",
+            "item": [
+                {
+                    "name": "1. Crear Sílabo Individual (Coordinador)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"professorEmail\": \"vmachacaa@ulasalle.edu.pe\",\n    \"academicPeriod\": \"2025-I\",\n    \"courseName\": \"Arquitectura de Software\",\n    \"courseCode\": \"SIS501\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "2. Cargar Data Excel (Coordinador)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi/1/upload-excel",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi",
+                                "1",
+                                "upload-excel"
+                            ]
+                        },
+                        "description": "Sube el Excel para poblar la data inicial del curso (test_silabo.xlsx)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "3. Listar Mis Sílabos (Profesor)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "4. Editar Sílabo Completo (Profesor)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"courseCompetence\": \"Diseña arquitecturas de software escalables y mantenibles.\",\n    \"profileCompetence\": \"Capacidad de análisis y diseño.\",\n    \"previousCompetence\": \"POO, Bases de Datos.\",\n    \"sumilla\": \"Fundamentos de arquitectura de software y patrones.\",\n    \"bibliography\": \"Bass, L. (2021). Software Architecture in Practice.\",\n    \"activities\": \"Análisis de casos, Diseño de diagramas.\",\n    \"units\": [\n        {\n            \"unitNumber\": 1,\n            \"title\": \"Fundamentos\",\n            \"content\": \"Introducción a la Arquitectura de Software, Estilos y Patrones.\",\n            \"startDate\": \"2025-08-18\",\n            \"endDate\": \"2025-09-13\",\n            \"week1Content\": \"INICIO: Presentación del curso.\",\n            \"week2Content\": \"TEMA01: Conceptos base.\",\n            \"week3Content\": \"TEMA02: Atributos de calidad.\",\n            \"week4Content\": \"TEMA03: Evaluación de arquitectura.\"\n        },\n        {\n            \"unitNumber\": 2,\n            \"title\": \"Patrones de Diseño\",\n            \"content\": \"Patrones Creacionales, Estructurales y de Comportamiento.\",\n            \"startDate\": \"2025-09-15\",\n            \"endDate\": \"2025-10-11\",\n            \"week1Content\": \"Patrones Creacionales (Singleton, Factory).\",\n            \"week2Content\": \"Patrones Estructurales (Adapter, Decorator).\",\n            \"week3Content\": \"Patrones de Comportamiento (Observer, Strategy).\",\n            \"week4Content\": \"Casos de estudio.\"\n        },\n        {\n            \"unitNumber\": 3,\n            \"title\": \"Arquitectura de Microservicios\",\n            \"content\": \"Principios de Microservicios, Diseño y Despliegue.\",\n            \"startDate\": \"2025-10-13\",\n            \"endDate\": \"2025-11-08\",\n            \"week1Content\": \"Monolitos vs Microservicios.\",\n            \"week2Content\": \"Diseño orientado a dominio (DDD).\",\n            \"week3Content\": \"Comunicación entre servicios.\",\n            \"week4Content\": \"Contenedores con Docker.\"\n        },\n        {\n            \"unitNumber\": 4,\n            \"title\": \"Proyecto Final\",\n            \"content\": \"Desarrollo y sustentación de una arquitectura propuesta.\",\n            \"startDate\": \"2025-11-10\",\n            \"endDate\": \"2025-12-06\",\n            \"week1Content\": \"Definición del proyecto.\",\n            \"week2Content\": \"Diseño de la solución.\",\n            \"week3Content\": \"Implementación de prototipo.\",\n            \"week4Content\": \"Sustentación final.\"\n        }\n    ],\n    \"evaluations\": [\n        { \"name\": \"EVIDENCIA 1\", \"weight\": 0.20, \"consolidationDate\": \"2025-09-15\", \"description\": \"Participación(10%)\\nAsistencia. (10%)\\nExamen de Entrada. (10%)\\nPráctica. (20%)\\nLaboratorios. (50%)\" },\n        { \"name\": \"EVIDENCIA 2\", \"weight\": 0.20, \"consolidationDate\": \"2025-10-06\", \"description\": \"Participación(10%)\\nAsistencia. (10%)\\nLaboratorios. (80%)\" },\n        { \"name\": \"EXAMEN PARCIAL\", \"weight\": 0.30, \"consolidationDate\": \"2025-10-27\", \"description\": \"Examen Teoría (80%)\\nExposición Patrones de Diseño. (20%)\" },\n        { \"name\": \"EVIDENCIA 3\", \"weight\": 0.20, \"consolidationDate\": \"2025-11-10\", \"description\": \"Participación(10%)\\nAsistencia. (10%)\\nLaboratorios. (60%)\\nActividad Extraacadémica. (20%)\" },\n        { \"name\": \"EVIDENCIA 4\", \"weight\": 0.10, \"consolidationDate\": \"2025-12-01\", \"description\": \"Participación(10%)\\nAsistencia. (10%)\\nLaboratorios. (60%)\\nPresentación Proyecto. (20%)\" },\n        { \"name\": \"EXAMEN FINAL\", \"weight\": 0.30, \"consolidationDate\": \"2025-12-15\", \"description\": \"1ra revisión proyecto. (10%)\\n2da revisión proyecto. (10%)\\nExamen Final teórico. (50%)\\nTrabajo Final. (30%)\" }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi/1",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "5. Listar Sílabos Enviados (Coordinador)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi?status=SUBMITTED",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "SUBMITTED"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "6. Aprobar (Coordinador)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi/1/status?status=APPROVED",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi",
+                                "1",
+                                "status"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "APPROVED"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "7. Descargar PDF",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/syllabi/1/pdf",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "syllabi",
+                                "1",
+                                "pdf"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080"
+        },
+        {
+            "key": "jwt_token",
+            "value": ""
+        }
+    ]
+}
