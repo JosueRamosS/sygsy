@@ -76,11 +76,77 @@ public class PdfService {
         document.add(program);
 
         String periodName = syllabus.getAcademicPeriod() != null ? syllabus.getAcademicPeriod().getName() : "PERIODO DESCONOCIDO";
-        Paragraph title = new Paragraph("\nSÍLABO " + periodName, HEADER_FONT);
+        String courseName = syllabus.getCourseName() != null ? syllabus.getCourseName().toUpperCase() : "CURSO DESCONOCIDO";
+        Paragraph title = new Paragraph("\nSÍLABO " + courseName + " " + periodName, HEADER_FONT);
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         
         document.add(new Paragraph("\n"));
+    }
+
+    // ... (addGeneralData remains unchanged) ...
+
+    private void addEvaluationSection(Document document, List<Evaluation> evaluations) throws DocumentException {
+        document.add(new Paragraph("IX. CRITERIOS DE EVALUACIÓN", HEADER_FONT));
+        document.add(new Paragraph("\n"));
+        
+        if (evaluations == null || evaluations.isEmpty()) {
+            document.add(new Paragraph("No hay evaluaciones registradas.", BODY_FONT));
+            return;
+        }
+
+        PdfPTable table = new PdfPTable(4); // 4 Columns
+        table.setWidthPercentage(100);
+        // EVALUACIÓN (20%), PESO (10%), FECHA (20%), DESCRIPCIÓN (50%)
+        table.setWidths(new float[]{2f, 1f, 2f, 5f});
+        
+        addHeaderCell(table, "EVALUACIÓN");
+        addHeaderCell(table, "PESO");
+        addHeaderCell(table, "FECHA DE CONSOLIDACIÓN");
+        addHeaderCell(table, "DESCRIPCIÓN DE LA EVALUACIÓN");
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+        for (Evaluation eval : evaluations) {
+            boolean isExam = eval.getName() != null && 
+                            (eval.getName().toUpperCase().contains("PARCIAL") || 
+                             eval.getName().toUpperCase().contains("FINAL"));
+            
+            java.awt.Color cellColor = isExam ? new java.awt.Color(220, 220, 220) : null;
+
+            // Name
+            PdfPCell nameCell = new PdfPCell(new Phrase(eval.getName(), BODY_FONT));
+            nameCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            nameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            if (isExam) nameCell.setBackgroundColor(cellColor);
+            table.addCell(nameCell);
+
+            // Weight
+            String weightStr = eval.getWeight() != null ? String.format("%.0f%%", eval.getWeight() * 100) : "0%";
+            PdfPCell weightCell = new PdfPCell(new Phrase(weightStr, BOLD_FONT));
+            weightCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            weightCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            if (isExam) weightCell.setBackgroundColor(cellColor);
+            table.addCell(weightCell);
+
+            // Date
+            String dateStr = "";
+            if (eval.getConsolidationDate() != null) {
+                dateStr = "Ingreso de notas hasta las 9h00\ndel " + eval.getConsolidationDate().format(dateFormatter);
+            }
+            PdfPCell dateCell = new PdfPCell(new Phrase(dateStr, BODY_FONT));
+            dateCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            dateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            if (isExam) dateCell.setBackgroundColor(cellColor);
+            table.addCell(dateCell);
+
+            // Description
+            PdfPCell descCell = new PdfPCell(new Phrase(eval.getDescription(), BODY_FONT));
+            descCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            if (isExam) descCell.setBackgroundColor(cellColor);
+            table.addCell(descCell);
+        }
+        document.add(table);
     }
 
     private void addGeneralData(Document document, Syllabus syllabus) throws DocumentException {
@@ -241,6 +307,7 @@ public class PdfService {
     }
 
     private void addUnitsSection(Document document, List<SyllabusUnit> units) throws DocumentException {
+        document.newPage(); // Force start on new page to keep Header and Table together
         document.add(new Paragraph("VI. UNIDADES DE APRENDIZAJE", HEADER_FONT));
         document.add(new Paragraph("\n"));
 
@@ -317,58 +384,7 @@ public class PdfService {
         }
     }
     
-    private void addEvaluationSection(Document document, List<Evaluation> evaluations) throws DocumentException {
-        document.add(new Paragraph("IX. CRITERIOS DE EVALUACIÓN", HEADER_FONT));
-        document.add(new Paragraph("\n"));
-        
-        if (evaluations == null || evaluations.isEmpty()) {
-            document.add(new Paragraph("No hay evaluaciones registradas.", BODY_FONT));
-            return;
-        }
 
-        PdfPTable table = new PdfPTable(4); // 4 Columns
-        table.setWidthPercentage(100);
-        // EVALUACIÓN (20%), PESO (10%), FECHA (20%), DESCRIPCIÓN (50%)
-        table.setWidths(new float[]{2f, 1f, 2f, 5f});
-        
-        addHeaderCell(table, "EVALUACIÓN");
-        addHeaderCell(table, "PESO");
-        addHeaderCell(table, "FECHA DE CONSOLIDACIÓN");
-        addHeaderCell(table, "DESCRIPCIÓN DE LA EVALUACIÓN");
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d/M/yyyy");
-
-        for (Evaluation eval : evaluations) {
-            // Name
-            PdfPCell nameCell = new PdfPCell(new Phrase(eval.getName(), BODY_FONT));
-            nameCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            nameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(nameCell);
-
-            // Weight
-            String weightStr = eval.getWeight() != null ? String.format("%.0f%%", eval.getWeight() * 100) : "0%";
-            PdfPCell weightCell = new PdfPCell(new Phrase(weightStr, BOLD_FONT));
-            weightCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            weightCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(weightCell);
-
-            // Date
-            String dateStr = "";
-            if (eval.getConsolidationDate() != null) {
-                dateStr = "Ingreso de notas hasta las 9h00\ndel " + eval.getConsolidationDate().format(dateFormatter);
-            }
-            PdfPCell dateCell = new PdfPCell(new Phrase(dateStr, BODY_FONT));
-            dateCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            dateCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(dateCell);
-
-            // Description
-            PdfPCell descCell = new PdfPCell(new Phrase(eval.getDescription(), BODY_FONT));
-            descCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            table.addCell(descCell);
-        }
-        document.add(table);
-    }
 
     private void addCenteredCell(PdfPTable table, String text) {
         PdfPCell cell = new PdfPCell(new Phrase(text, BODY_FONT));
