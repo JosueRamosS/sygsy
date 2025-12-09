@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neo-bg text-neo-main font-sans antialiased;
+  }
+}
+
+@layer components {
+  .neo-button {
+    @apply px-4 py-2 font-bold border-3 border-black bg-neo-white text-black shadow-neo transition-all hover:-translate-y-1 hover:shadow-neo-lg active:translate-y-0 active:shadow-neo-sm;
+  }
+
+  .neo-button-primary {
+    @apply neo-button bg-neo-violet text-white hover:bg-violet-600;
+  }
+
+  .neo-button-secondary {
+    @apply neo-button bg-neo-yellow hover:bg-yellow-500;
+  }
+
+  .neo-card {
+    @apply border-3 border-black bg-white shadow-neo p-6;
+  }
+
+  .neo-input {
+    @apply w-full border-3 border-black p-3 font-medium outline-none focus:shadow-neo transition-all;
+  }
+}

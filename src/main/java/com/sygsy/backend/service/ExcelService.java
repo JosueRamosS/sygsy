@@ -45,6 +45,8 @@ public class ExcelService {
                     // 0: Faculty, 1: Career, 2: Period (ignored here), 3: Semester, 4: Credits, ...
                     
                     syllabus.setFaculty(getStringValue(currentRow, 0));
+                    log.info("Parsed Row {}: Faculty='{}', Course='{}'", rowNumber, getStringValue(currentRow, 0), getStringValue(currentRow, 10));
+
                     syllabus.setCareer(getStringValue(currentRow, 1));
                     // Skip column 2 (Period)
                     syllabus.setSemester(getStringValue(currentRow, 3));
