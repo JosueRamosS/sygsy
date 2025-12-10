@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userToStore: User = {
                 id: userData.id,
                 username: userData.username,
-                fullName: userData.username, // Using username as fallback for fullname if backend response varies
+                fullName: userData.fullName || userData.username,
                 role: userData.role as 'COORDINATOR' | 'PROFESSOR',
                 career: userData.career
             };

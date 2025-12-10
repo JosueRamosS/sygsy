@@ -14,11 +14,14 @@ export const MainLayout = () => {
         <div className="flex min-h-screen bg-neo-bg">
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r-3 border-black flex flex-col fixed h-full z-10">
-                <div className="p-6 border-b-3 border-black bg-neo-yellow">
-                    <h2 className="text-2xl font-black uppercase tracking-tighter">Sygsy</h2>
-                    <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">
-                        {getRoleDisplayName(user?.role, user?.career)}
-                    </span>
+                <div className="p-6 border-b-3 border-black bg-neo-yellow flex items-center justify-between">
+                    <div>
+                        <h2 className="text-3xl font-black uppercase tracking-tighter leading-none">SYGSY</h2>
+                        <span className="text-[10px] font-bold bg-black text-white px-2 py-0.5 rounded-full block w-fit mt-1">
+                            {getRoleDisplayName(user?.role, user?.career)}
+                        </span>
+                    </div>
+                    <img src="/logo.png" alt="Logo" className="w-12 h-auto object-contain ml-2" />
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

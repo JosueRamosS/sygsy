@@ -54,6 +54,7 @@ public class AuthController {
         return ResponseEntity.ok(LoginResponse.builder()
                 .token(token)
                 .username(user.getUsername())
+                .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .career(user.getCareer())
                 .expiresIn(jwtUtil.getExpirationTime())

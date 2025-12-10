@@ -12,6 +12,7 @@ export interface AuthResponse {
     type: string;
     id: number;
     username: string;
+    fullName: string;
     role: string;
     career?: string;
 }

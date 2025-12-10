@@ -3,6 +3,7 @@ package com.sygsy.backend.dto;
 public class LoginResponse {
     private String token;
     private String username;
+    private String fullName;
     private String role;
     private String career; // Added field
     private Long expiresIn;
@@ -10,9 +11,10 @@ public class LoginResponse {
     public LoginResponse() {
     }
 
-    public LoginResponse(String token, String username, String role, String career, Long expiresIn) {
+    public LoginResponse(String token, String username, String fullName, String role, String career, Long expiresIn) {
         this.token = token;
         this.username = username;
+        this.fullName = fullName;
         this.role = role;
         this.career = career;
         this.expiresIn = expiresIn;
@@ -32,6 +34,14 @@ public class LoginResponse {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getRole() {
@@ -66,6 +76,7 @@ public class LoginResponse {
     public static class LoginResponseBuilder {
         private String token;
         private String username;
+        private String fullName;
         private String role;
         private String career;
         private Long expiresIn;
@@ -80,6 +91,11 @@ public class LoginResponse {
 
         public LoginResponseBuilder username(String username) {
             this.username = username;
+            return this;
+        }
+
+        public LoginResponseBuilder fullName(String fullName) {
+            this.fullName = fullName;
             return this;
         }
 
@@ -99,11 +115,11 @@ public class LoginResponse {
         }
 
         public LoginResponse build() {
-            return new LoginResponse(token, username, role, career, expiresIn);
+            return new LoginResponse(token, username, fullName, role, career, expiresIn);
         }
 
         public String toString() {
-            return "LoginResponse.LoginResponseBuilder(token=" + this.token + ", username=" + this.username + ", role=" + this.role + ", career=" + this.career + ", expiresIn=" + this.expiresIn + ")";
+            return "LoginResponse.LoginResponseBuilder(token=" + this.token + ", username=" + this.username + ", fullName=" + this.fullName + ", role=" + this.role + ", career=" + this.career + ", expiresIn=" + this.expiresIn + ")";
         }
     }
 }

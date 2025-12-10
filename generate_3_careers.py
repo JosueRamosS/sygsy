@@ -10,7 +10,7 @@ CAREERS_CONFIG = [
 ]
 
 # Professor to assign (MUST EXIST IN DB AS PROFESSOR ROLE)
-PROFESSOR_EMAIL = "profesor@ulasalle.edu.pe"
+PROFESSOR_EMAIL = "maramayov@ulasalle.edu.pe"
 
 # Data Lists
 TRAINING_AREAS = ["ESPECIALIDAD", "GENERAL", "INVESTIGACIÓN"]
