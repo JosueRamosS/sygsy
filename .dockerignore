@@ -1,0 +1,8 @@
+frontend/
+.git/
+.idea/
+target/
+*.md
+*.xlsx
+generate_3_careers.py
+sygsy.postman_collection.json
