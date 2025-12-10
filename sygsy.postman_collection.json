@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "b8f7e5d4-1234-5678-9abc-def012345678",
         "name": "SYGSY API (Completo)",
-        "description": "Colección completa del Backend con Auth, Usuarios y Workflow de Sílabos.",
+        "description": "Colección completa del Backend con Auth, Usuarios y Workflow de Sílabos. CRUD Completo.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
