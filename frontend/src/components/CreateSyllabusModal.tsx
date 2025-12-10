@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Modal } from './ui/Modal';
 import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import { userApi } from '../api/userApi';
 import { periodApi } from '../api/periodApi';
+import { careerApi } from '../api/careerApi';
 import type { AcademicPeriod } from '../api/periodApi';
+import type { Career } from '../api/careerApi';
 import { syllabusApi } from '../api/syllabusApi';
 import type { CreateSyllabusDTO } from '../api/syllabusApi';
 import type { User } from '../types/auth';
 import { NeoSelect } from './ui/NeoSelect';
-import { FileSpreadsheet, Upload, X } from 'lucide-react';
+import { FileSpreadsheet, Upload, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CreateSyllabusModalProps {
@@ -18,34 +22,53 @@ interface CreateSyllabusModalProps {
 }
 
 export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { user } = useAuth();
+    const isAdmin = !user?.career && user?.role === 'COORDINATOR';
     const [professors, setProfessors] = useState<User[]>([]);
     const [periods, setPeriods] = useState<AcademicPeriod[]>([]);
+    const [careers, setCareers] = useState<Career[]>([]);
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
 
     const [formData, setFormData] = useState<CreateSyllabusDTO>({
-        courseName: '', // Will be ignored/placeholder
-        courseCode: '', // Will be ignored/placeholder
+        courseName: '',
+        courseCode: '',
         academicPeriodId: 0,
         professorEmail: '',
+        career: ''
     });
 
     useEffect(() => {
         if (isOpen) {
             loadDependencies();
             setFile(null);
-            setFormData(prev => ({ ...prev, professorEmail: '', academicPeriodId: 0 }));
+            setFormData(prev => ({ ...prev, professorEmail: '', academicPeriodId: 0, courseName: '', courseCode: '' }));
         }
     }, [isOpen]);
 
     const loadDependencies = async () => {
         try {
-            const [profs, perds] = await Promise.all([
+            const promises: Promise<any>[] = [
                 userApi.getProfessors(),
                 periodApi.getAll()
-            ]);
+            ];
+
+            const isAdmin = !user?.career && user?.role === 'COORDINATOR';
+            if (isAdmin) {
+                promises.push(careerApi.getAll());
+            }
+
+            const results = await Promise.all(promises);
+            const profs = results[0];
+            const perds = results[1];
+
             setProfessors(profs);
             setPeriods(perds);
+
+            if (isAdmin && results[2]) {
+                setCareers(results[2]);
+            }
+
             if (perds.length > 0) {
                 setFormData(prev => ({ ...prev, academicPeriodId: perds[0].id }));
             }
@@ -60,6 +83,14 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -71,31 +102,54 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
             toast.error('Selecciona un Docente');
             return;
         }
-        if (!file) {
-            toast.error('Debes subir el Excel del Sílabo');
+        if (isAdmin && !formData.career) {
+            toast.error('Como administrador, debes seleccionar una Carrera');
             return;
         }
 
         setLoading(true);
+        let tempSyllabusId: number | null = null;
+
         try {
-            // 1. Create Shell Syllabus
-            const shellData: CreateSyllabusDTO = {
-                ...formData,
-                courseName: 'Procesando Excel...',
-                courseCode: 'TMP-' + Date.now().toString().slice(-4)
-            };
+            if (file) {
+                // Excel Mode: Shell -> Upload
+                const shellData: CreateSyllabusDTO = {
+                    ...formData,
+                    courseName: 'Procesando Excel...',
+                    courseCode: 'TMP-' + Date.now().toString().slice(-4)
+                };
+                const newSyllabus = await syllabusApi.create(shellData);
+                tempSyllabusId = newSyllabus.id;
 
-            const newSyllabus = await syllabusApi.create(shellData);
+                await syllabusApi.uploadExcel(newSyllabus.id, file);
+                toast.success('Sílabo creado y procesado (Excel)');
+            } else {
+                // Manual Mode
+                if (!formData.courseName || !formData.courseCode) {
+                    toast.error('Ingresa el Nombre y Código del Curso (o sube un Excel)');
+                    setLoading(false);
+                    return;
+                }
+                await syllabusApi.create(formData);
+                toast.success('Sílabo creado manualmente');
+            }
 
-            // 2. Upload Excel immediately
-            await syllabusApi.uploadExcel(newSyllabus.id, file);
-
-            toast.success('Sílabo creado y procesado correctamente');
             onSuccess();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('Error al procesar el sílabo. Verifica el archivo.');
+            const msg = error.response?.data?.message || 'Error al crear el sílabo.';
+            toast.error(msg);
+
+            // Rollback if temp syllabus was created but upload failed
+            if (tempSyllabusId) {
+                try {
+                    await syllabusApi.delete(tempSyllabusId);
+                    console.log('Rolled back temp syllabus', tempSyllabusId);
+                } catch (delError) {
+                    console.error('Failed to rollback temp syllabus', delError);
+                }
+            }
         } finally {
             setLoading(false);
         }
@@ -104,9 +158,10 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
     // Transform data for NeoSelect
     const periodOptions = periods.map(p => ({ value: p.id, label: p.name }));
     const professorOptions = professors.map(p => ({ value: p.username, label: `${p.fullName} (${p.username})` }));
+    const careerOptions = careers.map(c => ({ value: c.name, label: c.name }));
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Sílabo">
+        <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Sílabo (Individual)">
             <form onSubmit={handleSubmit} className="space-y-6">
 
                 {/* Selects */}
@@ -119,6 +174,16 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
                         placeholder="Seleccionar Periodo..."
                     />
 
+                    {isAdmin && (
+                        <NeoSelect
+                            label="Carrera (Admin)"
+                            value={formData.career || ''}
+                            onChange={(val) => setFormData(prev => ({ ...prev, career: String(val) }))}
+                            options={careerOptions}
+                            placeholder="Seleccionar Carrera..."
+                        />
+                    )}
+
                     <NeoSelect
                         label="Docente Encargado"
                         value={formData.professorEmail}
@@ -128,10 +193,43 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
                     />
                 </div>
 
-                {/* File Upload Area */}
+                {/* Manual Inputs */}
+                <div className="space-y-4">
+                    <Input
+                        label="Nombre del Curso"
+                        name="courseName"
+                        value={formData.courseName}
+                        onChange={handleChange}
+                        placeholder="Ej: Ingeniería de Software I"
+                        disabled={!!file}
+                    />
+
+                    <Input
+                        label="Código del Curso"
+                        name="courseCode"
+                        value={formData.courseCode}
+                        onChange={handleChange}
+                        placeholder="Ej: SIS01"
+                        disabled={!!file}
+                    />
+                </div>
+
+                {/* File Upload Area (Optional) */}
                 <div>
-                    <label className="block text-sm font-bold mb-2 uppercase">Archivo Excel</label>
-                    <div className="flex flex-col items-center justify-center border-3 border-dashed border-black p-8 bg-gray-50 hover:bg-white transition-colors cursor-pointer relative group">
+                    <div className="flex justify-between items-end mb-2">
+                        <label className="text-sm font-bold uppercase">
+                            Archivo Excel {file && <span className="text-neo-green">(Seleccionado)</span>}
+                        </label>
+                        <a
+                            href="/plantilla_unitario.xlsx"
+                            download="plantilla_unitario.xlsx"
+                            className="flex items-center gap-2 px-3 py-1 bg-neo-green text-black font-bold text-xs border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all uppercase"
+                        >
+                            <Download size={14} />
+                            Plantilla
+                        </a>
+                    </div>
+                    <div className={`flex flex-col items-center justify-center border-2 border-dashed px-8 py-6 transition-colors cursor-pointer relative group ${file ? 'border-neo-green bg-green-50' : 'border-black bg-gray-50 hover:bg-white'}`}>
                         <input
                             type="file"
                             accept=".xlsx, .xls"
@@ -141,25 +239,23 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
 
                         {file ? (
                             <div className="text-center relative z-20">
-                                <FileSpreadsheet size={48} className="mx-auto mb-2 text-neo-green drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
-                                <p className="font-bold text-lg">{file.name}</p>
-                                <p className="text-sm text-gray-500 mb-2">{(file.size / 1024).toFixed(2)} KB</p>
+                                <FileSpreadsheet size={32} className="mx-auto mb-1 text-neo-green drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
+                                <p className="font-bold text-sm">{file.name}</p>
                                 <button
                                     type="button"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         setFile(null);
                                     }}
-                                    className="text-xs font-bold text-red-600 hover:text-red-800 underline relative z-30"
+                                    className="text-xs font-bold text-red-600 hover:text-red-800 underline relative z-30 mt-1"
                                 >
-                                    Eliminar archivo
+                                    Quitar archivo
                                 </button>
                             </div>
                         ) : (
                             <div className="text-center group-hover:scale-105 transition-transform duration-200">
-                                <Upload size={48} className="mx-auto mb-2 text-gray-400 group-hover:text-black" />
-                                <p className="font-bold text-lg text-gray-600 group-hover:text-black">Subir Excel del Sílabo</p>
-                                <p className="text-sm text-gray-400">Archivos .xlsx o .xls</p>
+                                <Upload size={32} className="mx-auto mb-1 text-gray-400 group-hover:text-black" />
+                                <p className="font-bold text-sm text-gray-600 group-hover:text-black">Subir Excel (Opcional)</p>
                             </div>
                         )}
                     </div>
@@ -167,13 +263,13 @@ export const CreateSyllabusModal: React.FC<CreateSyllabusModalProps> = ({ isOpen
 
                 <Button
                     type="submit"
-                    className="w-full mt-6 py-4 text-lg bg-neo-green hover:bg-green-400"
+                    className="w-full mt-2 py-4 text-lg bg-neo-blue text-white hover:bg-blue-600"
                     disabled={loading}
                 >
-                    {loading ? 'PROCESANDO...' : 'CREAR SÍLABO'}
+                    {loading ? 'CREANDO...' : 'CREAR'}
                 </Button>
 
             </form>
-        </Modal>
+        </Modal >
     );
 };

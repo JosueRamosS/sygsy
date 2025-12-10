@@ -66,9 +66,22 @@ public class SyllabusService {
             }
         }
 
+        // Determine Career
+        String targetCareer;
+        if (coordinator.getCareer() != null && !coordinator.getCareer().isEmpty()) {
+            targetCareer = coordinator.getCareer();
+        } else {
+            // Admin must provide career
+            if (dto.getCareer() == null || dto.getCareer().isEmpty()) {
+                throw new RuntimeException("El administrador debe especificar una carrera para el sílabo.");
+            }
+            targetCareer = dto.getCareer();
+        }
+
         Syllabus syllabus = Syllabus.builder()
                 .academicPeriod(academicPeriod)
                 .courseName(dto.getCourseName())
+                .career(targetCareer)
                 .courseCode(dto.getCourseCode())
                 .professorEmail(dto.getProfessorEmail())
                 .professor(professor)
@@ -103,13 +116,27 @@ public class SyllabusService {
     }
 
     @Transactional
-    public Syllabus updateSyllabusFromExcel(Long id, MultipartFile file) {
+    public Syllabus updateSyllabusFromExcel(Long id, MultipartFile file, String username) {
+        User coordinator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Coordinator not found"));
+
         Syllabus existing = getSyllabus(id);
         List<Syllabus> parsedList = excelService.parseAllSyllabi(file);
         if (parsedList.isEmpty()) {
             throw new RuntimeException("No data found in Excel file");
         }
         Syllabus parsed = parsedList.get(0);
+
+        // VALIDATION: STRICT CAREER SCOPE (Individual Upload)
+        if (coordinator.getRole() == User.Role.COORDINATOR && coordinator.getCareer() != null && !coordinator.getCareer().trim().isEmpty()) {
+            String requiredCareer = coordinator.getCareer().trim();
+            String excelCareer = parsed.getCareer() != null ? parsed.getCareer().trim() : "";
+            
+            if (!requiredCareer.equalsIgnoreCase(excelCareer)) {
+                throw new RuntimeException("Usted es coordinador de '" + requiredCareer + 
+                    "' y no puede subir sílabos de la carrera '" + excelCareer + "'.");
+            }
+        }
 
         // VALIDATION: Check if Excel professor email matches syllabus professor email
         if (parsed.getProfessorEmail() != null && existing.getProfessorEmail() != null) {
@@ -154,6 +181,20 @@ public class SyllabusService {
                 .orElseThrow(() -> new RuntimeException("Academic period not found"));
 
         List<Syllabus> parsedList = excelService.parseAllSyllabi(file);
+        
+        // VALIDATION: STRICT CAREER SCOPE
+        // If coordinator has a specific career assigned, they can ONLY import syllabi for that career.
+        if (coordinator.getCareer() != null && !coordinator.getCareer().trim().isEmpty()) {
+            String requiredCareer = coordinator.getCareer().trim();
+            for (Syllabus parsed : parsedList) {
+                String excelCareer = parsed.getCareer() != null ? parsed.getCareer().trim() : "";
+                if (!requiredCareer.equalsIgnoreCase(excelCareer)) {
+                    throw new RuntimeException("Usted es coordinador de '" + requiredCareer + 
+                        "' y no puede subir sílabos de la carrera '" + excelCareer + "'.");
+                }
+            }
+        }
+
         List<Syllabus> savedSyllabi = new ArrayList<>();
 
         for (Syllabus parsed : parsedList) {
@@ -252,6 +293,35 @@ public class SyllabusService {
         return syllabusRepository.findByWorkflowStatus(workflowStatus);
     }
 
+    public List<Syllabus> getSyllabi(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getRole() == User.Role.PROFESSOR) {
+            return syllabusRepository.findByProfessor(user);
+        } else if (user.getRole() == User.Role.COORDINATOR) {
+            // Filter by Career if set
+            List<Syllabus> allSyllabi = syllabusRepository.findAll();
+            if (user.getCareer() != null && !user.getCareer().isEmpty()) {
+                List<Syllabus> filtered = new ArrayList<>();
+                for (Syllabus s : allSyllabi) {
+                    // Assuming Syllabus has 'career' field as String matching User's career
+                    if (user.getCareer().equalsIgnoreCase(s.getCareer())) {
+                        filtered.add(s);
+                    }
+                }
+                return filtered;
+            }
+            return allSyllabi; // If no career assigned, show all or none? User implies strictness.
+            // But let's show all for now if scope is null, or maybe none?
+            // "no debería poderse ver los sílabos de otro coordinador" -> Implies strict.
+            // If null, maybe they are a Super Coordinator? Let's default to all if null for safety of existing usage,
+            // but effectively filtering if set.
+        }
+        
+        return new ArrayList<>(); // Fallback
+    }
+
     public List<Syllabus> getSyllabiByProfessor(String username) {
         User professor = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Professor not found"));
@@ -301,5 +371,9 @@ public class SyllabusService {
         Syllabus syllabus = getSyllabus(id);
         syllabus.setWorkflowStatus(workflowStatus);
         return syllabusRepository.save(syllabus);
+    }
+
+    public void deleteSyllabus(Long id) {
+        syllabusRepository.deleteById(id);
     }
 }

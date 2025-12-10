@@ -37,9 +37,11 @@ public class SyllabusController {
     @PreAuthorize("hasRole('COORDINATOR')") // Only coordinators can upload Excel with general data
     public ResponseEntity<Syllabus> uploadExcel(
             @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(syllabusService.updateSyllabusFromExcel(id, file));
+        String username = authentication.getName();
+        return ResponseEntity.ok(syllabusService.updateSyllabusFromExcel(id, file, username));
     }
 
     @PostMapping("/upload-bulk")
@@ -69,18 +71,18 @@ public class SyllabusController {
             Authentication authentication,
             @RequestParam(required = false) Syllabus.SyllabusStatus status) {
         String username = authentication.getName();
-        boolean isCoordinator = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_COORDINATOR"));
+        
+        // Get filtered list based on role and career
+        List<Syllabus> syllabi = syllabusService.getSyllabi(username);
 
-        if (isCoordinator) {
-            // Coordinators can filter by status
-            if (status != null) {
-                return ResponseEntity.ok(syllabusService.getSyllabiByStatus(status));
-            }
-            return ResponseEntity.ok(syllabusService.getAllSyllabi());
-        } else {
-            // Professors only see their own syllabi
-            return ResponseEntity.ok(syllabusService.getSyllabiByProfessor(username));
+        // Apply status filter if present
+        if (status != null) {
+            syllabi = syllabi.stream()
+                .filter(s -> s.getWorkflowStatus() == status)
+                .toList();
         }
+
+        return ResponseEntity.ok(syllabi);
     }
 
     @GetMapping("/{id}")
@@ -112,5 +114,12 @@ public class SyllabusController {
         }
 
         return ResponseEntity.ok(syllabusService.updateStatus(id, status));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('COORDINATOR')")
+    public ResponseEntity<Void> deleteSyllabus(@PathVariable Long id) {
+        syllabusService.deleteSyllabus(id);
+        return ResponseEntity.noContent().build();
     }
 }

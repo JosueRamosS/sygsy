@@ -34,4 +34,15 @@ public class UserController {
     public ResponseEntity<List<User>> listCoordinators() {
         return ResponseEntity.ok(userRepository.findByRole(User.Role.COORDINATOR));
     }
+
+    @org.springframework.web.bind.annotation.PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@org.springframework.web.bind.annotation.PathVariable Long id, @org.springframework.web.bind.annotation.RequestBody User updatedUser) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    if (updatedUser.getCareer() != null) user.setCareer(updatedUser.getCareer());
+                    if (updatedUser.getFullName() != null) user.setFullName(updatedUser.getFullName());
+                    return ResponseEntity.ok(userRepository.save(user));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

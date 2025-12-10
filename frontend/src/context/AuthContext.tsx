@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, LoginRequest, AuthResponse } from '../types/auth';
 import api from '../api/client';
 import toast from 'react-hot-toast';
+import { getRoleDisplayName } from '../utils/roleUtils';
 
 interface AuthContextType {
     user: User | null;
@@ -44,14 +45,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: userData.id,
                 username: userData.username,
                 fullName: userData.username, // Using username as fallback for fullname if backend response varies
-                role: userData.role as 'COORDINATOR' | 'PROFESSOR'
+                role: userData.role as 'COORDINATOR' | 'PROFESSOR',
+                career: userData.career
             };
 
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(userToStore));
             setUser(userToStore);
 
-            toast.success(`Bienvenido, ${userToStore.role}`);
+            toast.success(`Bienvenido, ${getRoleDisplayName(userToStore.role, userToStore.career)}`);
         } catch (error: any) {
             console.error("Login failed", error);
             toast.error('Credenciales inválidas');

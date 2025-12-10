@@ -67,6 +67,7 @@ export interface CreateSyllabusDTO {
     courseCode: string;
     academicPeriodId: number;
     professorEmail: string;
+    career?: string;
 }
 
 export const syllabusApi = {
@@ -102,7 +103,7 @@ export const syllabusApi = {
         return response.data;
     },
 
-    uploadExcel: async (id: number, file: File) => {
+    uploadExcel: async (id: number, file: File): Promise<Syllabus> => {
         const formData = new FormData();
         formData.append('file', file);
         const response = await api.post<Syllabus>(`/syllabi/${id}/upload-excel`, formData, {
@@ -111,5 +112,21 @@ export const syllabusApi = {
             },
         });
         return response.data;
+    },
+
+    uploadBulk: async (file: File, academicPeriodId: number): Promise<Syllabus[]> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('academicPeriodId', academicPeriodId.toString());
+        const response = await api.post<Syllabus[]>('/syllabi/upload-bulk', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    },
+
+    delete: async (id: number) => {
+        await api.delete(`/syllabi/${id}`);
     }
 };

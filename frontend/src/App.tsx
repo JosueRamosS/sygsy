@@ -6,6 +6,11 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { SyllabusEditPage } from './pages/SyllabusEditPage';
+import { PeriodsPage } from './pages/PeriodsPage';
+import { CareersPage } from './pages/CareersPage';
+import { CoordinatorsPage } from './pages/CoordinatorsPage';
+import { ProfessorsPage } from './pages/ProfessorsPage';
+import { SyllabiPage } from './pages/SyllabiPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -19,6 +24,42 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   return <>{children}</>;
+};
+
+const DefaultRedirect = () => {
+  const { user } = useAuth();
+
+  // Admin (Coordinator without career) goes to periods
+  if (user?.role === 'COORDINATOR' && !user?.career) {
+    return <Navigate to="/periods" replace />;
+  }
+
+  // Everyone else goes to dashboard
+  return <Navigate to="/dashboard" replace />;
+};
+
+const DashboardRoute = () => {
+  const { user } = useAuth();
+
+  // Admin cannot access dashboard - redirect to periods
+  if (user?.role === 'COORDINATOR' && !user?.career) {
+    return <Navigate to="/periods" replace />;
+  }
+
+  // Everyone else can access dashboard
+  return <Dashboard />;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+
+  // Only admin (Coordinator without career) can access admin routes
+  if (user?.role === 'COORDINATOR' && !user?.career) {
+    return <>{children}</>;
+  }
+
+  // Everyone else redirects to dashboard
+  return <Navigate to="/dashboard" replace />;
 };
 
 function App() {
@@ -55,9 +96,14 @@ function App() {
               <MainLayout />
             </ProtectedRoute>
           }>
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="dashboard" element={<DashboardRoute />} />
+            <Route path="syllabi" element={<SyllabiPage />} />
+            <Route path="periods" element={<AdminRoute><PeriodsPage /></AdminRoute>} />
+            <Route path="careers" element={<AdminRoute><CareersPage /></AdminRoute>} />
+            <Route path="coordinators" element={<AdminRoute><CoordinatorsPage /></AdminRoute>} />
+            <Route path="professors" element={<AdminRoute><ProfessorsPage /></AdminRoute>} />
             <Route path="syllabus/:id/edit" element={<SyllabusEditPage />} />
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<DefaultRedirect />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

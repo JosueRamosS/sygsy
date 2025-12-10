@@ -121,7 +121,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"rescobedo@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Ricardo Escobedo\",\n    \"role\": \"COORDINATOR\"\n}"
+                            "raw": "{\n    \"username\": \"rescobedo@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Ricardo Escobedo\",\n    \"role\": \"COORDINATOR\",\n    \"career\": \"Ingeniería de Software\"\n}"
                         },
                         "url": {
                             "raw": "http://localhost:8080/api/auth/register",
@@ -134,6 +134,46 @@
                                 "api",
                                 "auth",
                                 "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Registrar Coordinadores (Batch)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[\n    {\n        \"username\": \"derecho_admin@ulasalle.edu.pe\",\n        \"password\": \"123\",\n        \"fullName\": \"Coord. Derecho\",\n        \"role\": \"COORDINATOR\",\n        \"career\": \"Derecho\"\n    },\n    {\n        \"username\": \"arquitectura_admin@ulasalle.edu.pe\",\n        \"password\": \"123\",\n        \"fullName\": \"Coord. Arquitectura\",\n        \"role\": \"COORDINATOR\",\n        \"career\": \"Arquitectura y Urbanismo\"\n    },\n    {\n        \"username\": \"industrial_admin@ulasalle.edu.pe\",\n        \"password\": \"123\",\n        \"fullName\": \"Coord. Industrial\",\n        \"role\": \"COORDINATOR\",\n        \"career\": \"Ingeniería Industrial\"\n    },\n    {\n        \"username\": \"psicologia_admin@ulasalle.edu.pe\",\n        \"password\": \"123\",\n        \"fullName\": \"Coord. Psicologia\",\n        \"role\": \"COORDINATOR\",\n        \"career\": \"Psicología\"\n    },\n    {\n        \"username\": \"profesor@ulasalle.edu.pe\",\n        \"password\": \"123\",\n        \"fullName\": \"Profesor General\",\n        \"role\": \"PROFESSOR\"\n    }\n]"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/auth/register-batch",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register-batch"
                             ]
                         }
                     },
@@ -161,7 +201,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"vmachacaa@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Victor Machaca\",\n    \"role\": \"PROFESSOR\"\n}"
+                            "raw": "{\n    \"username\": \"vmachacaa@ulasalle.edu.pe\",\n    \"password\": \"123\",\n    \"fullName\": \"Victor Machaca\",\n    \"role\": \"PROFESSOR\",\n    \"career\": \"Ingeniería de Software\"\n}"
                         },
                         "url": {
                             "raw": "http://localhost:8080/api/auth/register",

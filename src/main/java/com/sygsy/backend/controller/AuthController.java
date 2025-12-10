@@ -55,6 +55,7 @@ public class AuthController {
                 .token(token)
                 .username(user.getUsername())
                 .role(user.getRole().name())
+                .career(user.getCareer())
                 .expiresIn(jwtUtil.getExpirationTime())
                 .build());
     }
@@ -70,5 +71,28 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setStatus("ACTIVE");
         return ResponseEntity.ok(userRepository.save(user));
+    }
+    @PostMapping("/register-batch")
+    @PreAuthorize("hasRole('COORDINATOR')") // Only coordinators/admins can create users
+    public ResponseEntity<java.util.List<User>> registerBatch(@RequestBody java.util.List<User> users) {
+        java.util.List<User> savedUsers = new java.util.ArrayList<>();
+        
+        for (User user : users) {
+            // Validate that user doesn't already exist
+            if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+                // Determine behavior: Skip or Throw? 
+                // For batch, skipping existing or updating might be better, 
+                // but let's throw only if strict. Given user request, we'll just skip to avoid breaking the whole batch 
+                // OR we can just continue. Let's log and continue? 
+                // Simplest is to check and only save if new.
+                continue; 
+            }
+            
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setStatus("ACTIVE");
+            savedUsers.add(userRepository.save(user));
+        }
+        
+        return ResponseEntity.ok(savedUsers);
     }
 }

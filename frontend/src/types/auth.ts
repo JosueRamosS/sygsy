@@ -3,6 +3,7 @@ export interface User {
     username: string;
     fullName: string;
     role: 'COORDINATOR' | 'PROFESSOR';
+    career?: string;
     // Add other user fields as needed
 }
 
@@ -12,6 +13,7 @@ export interface AuthResponse {
     id: number;
     username: string;
     role: string;
+    career?: string;
 }
 
 export interface LoginRequest {

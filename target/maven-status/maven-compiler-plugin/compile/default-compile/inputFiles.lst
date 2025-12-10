@@ -5,9 +5,11 @@
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/config/SecurityConfig.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/controller/AcademicPeriodController.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/controller/AuthController.java
+/Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/controller/CareerController.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/controller/SyllabusController.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/controller/UserController.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/domain/AcademicPeriod.java
+/Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/domain/Career.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/domain/Evaluation.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/domain/Syllabus.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/domain/SyllabusUnit.java
@@ -18,9 +20,11 @@
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/dto/LoginResponse.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/exception/GlobalExceptionHandler.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/repository/AcademicPeriodRepository.java
+/Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/repository/CareerRepository.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/repository/SyllabusRepository.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/repository/UserRepository.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/service/AcademicPeriodService.java
+/Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/service/CareerService.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/service/CustomUserDetailsService.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/service/ExcelService.java
 /Users/jcrdev/Desktop/sílabos/src/main/java/com/sygsy/backend/service/PdfService.java

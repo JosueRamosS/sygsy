@@ -4,15 +4,17 @@ public class LoginResponse {
     private String token;
     private String username;
     private String role;
-    private Long expiresIn; // in seconds
+    private String career; // Added field
+    private Long expiresIn;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(String token, String username, String role, Long expiresIn) {
+    public LoginResponse(String token, String username, String role, String career, Long expiresIn) {
         this.token = token;
         this.username = username;
         this.role = role;
+        this.career = career;
         this.expiresIn = expiresIn;
     }
 
@@ -40,6 +42,14 @@ public class LoginResponse {
         this.role = role;
     }
 
+    public String getCareer() {
+        return career;
+    }
+
+    public void setCareer(String career) {
+        this.career = career;
+    }
+
     public Long getExpiresIn() {
         return expiresIn;
     }
@@ -57,6 +67,7 @@ public class LoginResponse {
         private String token;
         private String username;
         private String role;
+        private String career;
         private Long expiresIn;
 
         LoginResponseBuilder() {
@@ -77,17 +88,22 @@ public class LoginResponse {
             return this;
         }
 
+        public LoginResponseBuilder career(String career) {
+            this.career = career;
+            return this;
+        }
+
         public LoginResponseBuilder expiresIn(Long expiresIn) {
             this.expiresIn = expiresIn;
             return this;
         }
 
         public LoginResponse build() {
-            return new LoginResponse(token, username, role, expiresIn);
+            return new LoginResponse(token, username, role, career, expiresIn);
         }
 
         public String toString() {
-            return "LoginResponse.LoginResponseBuilder(token=" + this.token + ", username=" + this.username + ", role=" + this.role + ", expiresIn=" + this.expiresIn + ")";
+            return "LoginResponse.LoginResponseBuilder(token=" + this.token + ", username=" + this.username + ", role=" + this.role + ", career=" + this.career + ", expiresIn=" + this.expiresIn + ")";
         }
     }
 }

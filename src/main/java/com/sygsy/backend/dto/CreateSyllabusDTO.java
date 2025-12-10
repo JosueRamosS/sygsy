@@ -6,16 +6,18 @@ public class CreateSyllabusDTO {
     private String academicPeriod; // Alternative: Name of AcademicPeriod (e.g. "2025-I")
     private String courseName;     // Optional, for identification
     private String courseCode;     // Optional
+    private String career;         // Optional (Required for Admin)
 
     public CreateSyllabusDTO() {
     }
 
-    public CreateSyllabusDTO(String professorEmail, Long academicPeriodId, String academicPeriod, String courseName, String courseCode) {
+    public CreateSyllabusDTO(String professorEmail, Long academicPeriodId, String academicPeriod, String courseName, String courseCode, String career) {
         this.professorEmail = professorEmail;
         this.academicPeriodId = academicPeriodId;
         this.academicPeriod = academicPeriod;
         this.courseName = courseName;
         this.courseCode = courseCode;
+        this.career = career;
     }
 
     public String getProfessorEmail() {
@@ -56,5 +58,13 @@ public class CreateSyllabusDTO {
 
     public void setCourseCode(String courseCode) {
         this.courseCode = courseCode;
+    }
+
+    public String getCareer() {
+        return career;
+    }
+
+    public void setCareer(String career) {
+        this.career = career;
     }
 }

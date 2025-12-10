@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
+import { getRoleDisplayName } from '../utils/roleUtils';
+
 import { LogOut, LayoutDashboard, FileText, UserCircle } from 'lucide-react';
 
 export const MainLayout = () => {
@@ -15,36 +17,68 @@ export const MainLayout = () => {
                 <div className="p-6 border-b-3 border-black bg-neo-yellow">
                     <h2 className="text-2xl font-black uppercase tracking-tighter">Sygsy</h2>
                     <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">
-                        {user?.role}
+                        {getRoleDisplayName(user?.role, user?.career)}
                     </span>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <Button
-                        variant="outline"
-                        className="w-full justify-start text-left flex items-center gap-3 border-2"
-                        onClick={() => navigate('/dashboard')}
-                    >
-                        <LayoutDashboard size={20} /> Dashboard
-                    </Button>
+                    {/* STANDARD MENU (For Non-Admins) */}
+                    {(user?.career || user?.role === 'PROFESSOR') && (
+                        <>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left flex items-center gap-3 border-2"
+                                onClick={() => navigate('/dashboard')}
+                            >
+                                <LayoutDashboard size={20} /> Dashboard
+                            </Button>
+                        </>
+                    )}
 
-                    {user?.role === 'COORDINATOR' && (
+                    {/* ADMIN MENU (Coordinator without Career) */}
+                    {user?.role === 'COORDINATOR' && !user?.career && (
+                        <>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left flex items-center gap-3 border-2"
+                                onClick={() => navigate('/periods')}
+                            >
+                                <FileText size={20} /> Semestres
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left flex items-center gap-3 border-2"
+                                onClick={() => navigate('/careers')}
+                            >
+                                <BookOpen size={20} /> Carreras
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left flex items-center gap-3 border-2"
+                                onClick={() => navigate('/coordinators')}
+                            >
+                                <UserCircle size={20} /> Coordinadores
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left flex items-center gap-3 border-2"
+                                onClick={() => navigate('/professors')}
+                            >
+                                <UserCircle size={20} /> Docentes
+                            </Button>
+                        </>
+                    )}
+
+                    {/* Show Syllabi only for Non-Admins */}
+                    {(user?.career || user?.role === 'PROFESSOR') && (
                         <Button
                             variant="outline"
                             className="w-full justify-start text-left flex items-center gap-3 border-2"
-                            onClick={() => navigate('/periods')}
+                            onClick={() => navigate('/syllabi')}
                         >
-                            <FileText size={20} /> Periodos
+                            <BookOpen size={20} /> Sílabos
                         </Button>
                     )}
-
-                    <Button
-                        variant="outline"
-                        className="w-full justify-start text-left flex items-center gap-3 border-2"
-                        onClick={() => navigate('/syllabi')}
-                    >
-                        <BookOpen size={20} /> Sílabos
-                    </Button>
                 </nav>
 
                 <div className="p-4 border-t-3 border-black bg-gray-50">
@@ -64,13 +98,13 @@ export const MainLayout = () => {
                         <LogOut size={16} /> CERRAR SESIÓN
                     </Button>
                 </div>
-            </aside>
+            </aside >
 
             {/* Main Content */}
-            <main className="flex-1 ml-64 p-8">
+            < main className="flex-1 ml-64 p-8" >
                 <Outlet />
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 

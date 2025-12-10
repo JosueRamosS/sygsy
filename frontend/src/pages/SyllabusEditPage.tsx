@@ -224,7 +224,7 @@ export const SyllabusEditPage = () => {
                     <Button onClick={handlePreview} disabled={previewing || saving || sending} className="bg-neo-blue text-white border-2 border-black flex gap-2 items-center hover:brightness-110 h-10 text-sm md:text-base">
                         <Eye size={18} /> <span className="hidden md:inline">{previewing ? 'Generando...' : 'PREVISUALIZAR'}</span>
                     </Button>
-                    <Button onClick={() => handleSave(false)} disabled={saving || sending} className="bg-white border-2 border-black flex gap-2 items-center hover:bg-gray-100 h-10 text-sm md:text-base">
+                    <Button onClick={() => handleSave(false)} disabled={saving || sending} className="bg-white text-black border-2 border-black flex gap-2 items-center hover:bg-gray-100 h-10 text-sm md:text-base font-bold">
                         <Save size={18} /> <span className="hidden md:inline">{saving ? 'Guardando...' : 'GUARDAR'}</span>
                     </Button>
                     <Button onClick={handleSendClick} disabled={sending || saving} variant="secondary" className="bg-neo-green flex gap-2 items-center text-black h-10 text-sm md:text-base border-2 border-black">

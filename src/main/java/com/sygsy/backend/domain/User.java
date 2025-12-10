@@ -19,6 +19,9 @@ public class User {
 
     @Column(nullable = false)
     private String fullName;
+
+    @Column
+    private String career; // Nullable for professors or admins, mainly for Coordinators
     
     // Add missing email field if syllabus relies on it, though username might be email.
     // Based on Syllabus code: syllabus.getProfessor().getEmail() was called in PdfService refactor.
@@ -54,11 +57,12 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String username, String password, String fullName, Role role, String status, Long createdBy, Long modifiedBy, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public User(Long id, String username, String password, String fullName, String career, Role role, String status, Long createdBy, Long modifiedBy, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fullName = fullName;
+        this.career = career;
         this.role = role;
         this.status = status;
         this.createdBy = createdBy;
@@ -124,6 +128,14 @@ public class User {
         this.fullName = fullName;
     }
 
+    public String getCareer() {
+        return career;
+    }
+
+    public void setCareer(String career) {
+        this.career = career;
+    }
+
     public Role getRole() {
         return role;
     }
@@ -182,6 +194,7 @@ public class User {
         private String username;
         private String password;
         private String fullName;
+        private String career;
         private Role role;
         private String status = "ACTIVE";
         private Long createdBy;
@@ -209,6 +222,11 @@ public class User {
 
         public UserBuilder fullName(String fullName) {
             this.fullName = fullName;
+            return this;
+        }
+
+        public UserBuilder career(String career) {
+            this.career = career;
             return this;
         }
 
@@ -243,7 +261,7 @@ public class User {
         }
 
         public User build() {
-            return new User(id, username, password, fullName, role, status, createdBy, modifiedBy, createdAt, modifiedAt);
+            return new User(id, username, password, fullName, career, role, status, createdBy, modifiedBy, createdAt, modifiedAt);
         }
 
         public String toString() {

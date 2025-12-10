@@ -2,49 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from "../context/AuthContext";
 import { syllabusApi } from '../api/syllabusApi';
 import type { Syllabus } from '../api/syllabusApi';
-import { periodApi } from '../api/periodApi';
-import type { AcademicPeriod } from '../api/periodApi';
-import { CreateSyllabusModal } from '../components/CreateSyllabusModal';
-import { UploadExcelModal } from '../components/UploadExcelModal';
-import { ConfirmModal } from '../components/ui/ConfirmModal';
-import { NeoSelect } from '../components/ui/NeoSelect';
-import { LogOut, Plus, FileSpreadsheet, Eye, Pencil, Send, Check, RotateCcw } from 'lucide-react';
+import { FileText, Send, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
-type ModalAction = 'ASSIGN' | 'APPROVE' | 'RETURN';
+import { getRoleDisplayName } from '../utils/roleUtils';
 
 export const Dashboard = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [syllabi, setSyllabi] = useState<Syllabus[]>([]);
-    const [periods, setPeriods] = useState<AcademicPeriod[]>([]);
-    const [selectedPeriod, setSelectedPeriod] = useState<number | 'all'>('all');
-
-    // Modals State
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isUploadExcelModalOpen, setIsUploadExcelModalOpen] = useState(false);
-    const [uploadSyllabusId, setUploadSyllabusId] = useState<number | null>(null);
-    const [confirmModal, setConfirmModal] = useState<{
-        isOpen: boolean,
-        syllabus: Syllabus | null,
-        action: ModalAction | null
-    }>({ isOpen: false, syllabus: null, action: null });
-    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
-        fetchPeriods();
         fetchSyllabi();
     }, []);
-
-    const fetchPeriods = async () => {
-        try {
-            const data = await periodApi.getAll();
-            setPeriods(data);
-        } catch (error) {
-            console.error('Error fetching periods:', error);
-        }
-    };
 
     const fetchSyllabi = async () => {
         try {
@@ -52,351 +22,126 @@ export const Dashboard = () => {
             setSyllabi(data);
         } catch (error) {
             console.error('Error fetching syllabi:', error);
+            toast.error('Error al cargar sílabos');
         }
     };
 
-    const handleCreateSuccess = () => {
-        fetchSyllabi();
-        setIsCreateModalOpen(false);
+    // Calculate statistics
+    const stats = {
+        created: syllabi.filter(s => s.workflowStatus === 'CREATED').length,
+        assigned: syllabi.filter(s => s.workflowStatus === 'ASSIGNED').length,
+        submitted: syllabi.filter(s => s.workflowStatus === 'SUBMITTED').length,
+        approved: syllabi.filter(s => s.workflowStatus === 'APPROVED').length,
+        returned: syllabi.filter(s => s.workflowStatus === 'RETURNED').length,
     };
 
-    const handleUploadSuccess = () => {
-        fetchSyllabi();
-        setIsUploadExcelModalOpen(false);
-        setUploadSyllabusId(null);
-    };
-
-    const handleOpenUpload = (id: number) => {
-        setUploadSyllabusId(id);
-        setIsUploadExcelModalOpen(true);
-    };
-
-    const handleViewPdf = async (id: number) => {
-        try {
-            const blob = await syllabusApi.getPdf(id);
-            const url = window.URL.createObjectURL(blob);
-            window.open(url, '_blank');
-        } catch (error) {
-            console.error('Error downloading PDF:', error);
-            alert('Error al descargar el PDF');
-        }
-    };
-
-    const handleAssignClick = (syllabus: Syllabus) => {
-        setConfirmModal({ isOpen: true, syllabus, action: 'ASSIGN' });
-    };
-
-    const handleApproveClick = (syllabus: Syllabus) => {
-        setConfirmModal({ isOpen: true, syllabus, action: 'APPROVE' });
-    };
-
-    const handleReturnClick = (syllabus: Syllabus) => {
-        setConfirmModal({ isOpen: true, syllabus, action: 'RETURN' });
-    };
-
-    const handleConfirmAction = async () => {
-        const { syllabus, action } = confirmModal;
-        if (!syllabus || !action) return;
-
-        setIsProcessing(true);
-        try {
-            let status = '';
-            let successMsg = '';
-
-            switch (action) {
-                case 'ASSIGN':
-                    status = 'ASSIGNED';
-                    successMsg = 'Sílabo asignado correctamente';
-                    break;
-                case 'APPROVE':
-                    status = 'APPROVED';
-                    successMsg = 'Sílabo aprobado correctamente';
-                    break;
-                case 'RETURN':
-                    status = 'RETURNED';
-                    successMsg = 'Sílabo devuelto al docente';
-                    break;
-            }
-
-            // @ts-ignore
-            await syllabusApi.updateStatus(syllabus.id, status);
-            toast.success(successMsg);
-            fetchSyllabi();
-            setConfirmModal({ isOpen: false, syllabus: null, action: null });
-        } catch (error) {
-            toast.error('Error al procesar la acción');
-            console.error(error);
-        } finally {
-            setIsProcessing(false);
-        }
-    };
-
-    const getModalContent = () => {
-        const { syllabus, action } = confirmModal;
-        if (!syllabus || !action) return { title: '', message: '', confirmText: '' };
-
-        switch (action) {
-            case 'ASSIGN':
-                return {
-                    title: 'Confirmar Asignación',
-                    message: `¿Asignar sílabo "${syllabus.courseName}" al docente ${syllabus.professor?.fullName || 'seleccionado'}?`,
-                    confirmText: 'ASIGNAR'
-                };
-            case 'APPROVE':
-                return {
-                    title: 'Aprobar Sílabo',
-                    message: `¿Estás seguro de APROBAR el sílabo de "${syllabus.courseName}"?`,
-                    confirmText: 'APROBAR'
-                };
-            case 'RETURN':
-                return {
-                    title: 'Devolver Sílabo',
-                    message: `¿Devolver el sílabo de "${syllabus.courseName}" al docente para correcciones?`,
-                    confirmText: 'DEVOLVER'
-                };
-            default:
-                return { title: '', message: '', confirmText: '' };
-        }
-    };
-
-    // Filter logic
-    const filteredSyllabi = syllabi.filter(s => {
-        // Period filter
-        if (selectedPeriod !== 'all' && s.academicPeriod?.id !== selectedPeriod) return false;
-
-        // Role filter
-        if (user?.role === 'PROFESSOR') {
-            // Professors don't see CREATED items
-            if (s.workflowStatus === 'CREATED') return false;
-            // Professors only see their own (backend likely filters this too, but for safety)
-            // Just double checking if filtering generically is enough or if backend handles ownership.
-            // Assuming backend returns only user's syllabi or we filter by ID if listing ALL.
-            // The prompt says "al profe no le aparece CREATED", implying filtering.
-        }
-        return true;
-    });
-
-    const getStatusLabel = (status: string, role: string | undefined) => {
-        if (!status) return '---';
-
-        if (role === 'COORDINATOR') {
-            switch (status) {
-                case 'CREATED': return 'Pendiente de asignar';
-                case 'ASSIGNED': return 'Enviado al profesor';
-                case 'SUBMITTED': return 'Pendiente de revisión'; // "Pendiente de revisión" was requested for SUBMITTED
-                case 'APPROVED': return 'Aprobado';
-                case 'RETURNED': return 'Devuelto con observaciones';
-                default: return status;
-            }
-        } else if (role === 'PROFESSOR') {
-            switch (status) {
-                // CREATED should be hidden
-                case 'ASSIGNED': return 'Por completar';
-                case 'SUBMITTED': return 'En revisión';
-                case 'APPROVED': return 'Aprobado';
-                case 'RETURNED': return 'Requiere correcciones';
-                default: return status;
-            }
-        }
-        return status;
-    };
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'CREATED': return 'bg-gray-200 text-gray-800';
-            case 'ASSIGNED': return 'bg-blue-100 text-blue-800';
-            case 'SUBMITTED': return 'bg-yellow-100 text-yellow-800';
-            case 'APPROVED': return 'bg-green-100 text-green-800';
-            case 'RETURNED': return 'bg-red-100 text-red-800';
-            default: return 'bg-gray-100 text-gray-800';
-        }
-    };
-
-    const modalContent = getModalContent();
-
-    // Transform options for NeoSelect
-    const periodOptions = [
-        { value: 'all', label: 'TODOS' },
-        ...periods.map(p => ({ value: p.id, label: p.name }))
+    const statCards = [
+        {
+            title: user?.role === 'COORDINATOR' ? 'Pendiente de asignar' : 'Creados',
+            value: stats.created,
+            icon: FileText,
+            color: 'bg-gray-100',
+            iconColor: 'text-gray-600',
+            borderColor: 'border-gray-600'
+        },
+        {
+            title: user?.role === 'COORDINATOR' ? 'Enviados al profesor' : 'Por completar',
+            value: stats.assigned,
+            icon: Send,
+            color: 'bg-blue-100',
+            iconColor: 'text-blue-600',
+            borderColor: 'border-blue-600'
+        },
+        {
+            title: user?.role === 'COORDINATOR' ? 'Pendiente de revisión' : 'En revisión',
+            value: stats.submitted,
+            icon: Clock,
+            color: 'bg-yellow-100',
+            iconColor: 'text-yellow-600',
+            borderColor: 'border-yellow-600'
+        },
+        {
+            title: 'Aprobados',
+            value: stats.approved,
+            icon: CheckCircle,
+            color: 'bg-green-100',
+            iconColor: 'text-green-600',
+            borderColor: 'border-green-600'
+        },
+        {
+            title: user?.role === 'COORDINATOR' ? 'Devueltos con observaciones' : 'Requiere correcciones',
+            value: stats.returned,
+            icon: XCircle,
+            color: 'bg-red-100',
+            iconColor: 'text-red-600',
+            borderColor: 'border-red-600'
+        },
     ];
 
     return (
         <div className="min-h-screen bg-neo-bg p-8 font-sans">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-12 bg-white p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                    <div>
-                        <h1 className="text-4xl font-black uppercase mb-1 tracking-tighter">
-                            Gestión de Sílabos
-                        </h1>
-                        <p className="text-lg font-bold text-gray-500">
-                            Bienvenido, {user?.fullName} <span className="text-sm bg-black text-white px-2 py-0.5 rounded-full ml-2 uppercase">{user?.role}</span>
-                        </p>
-                    </div>
-                    <button
-                        onClick={logout}
-                        className="flex items-center gap-2 px-6 py-3 bg-neo-red text-white font-bold border-2 border-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
-                    >
-                        <LogOut size={20} />
-                        CERRAR SESIÓN
-                    </button>
+                <div className="mb-12">
+                    <h1 className="text-5xl font-black uppercase mb-3 tracking-tighter">
+                        ¡Bienvenido/a!
+                    </h1>
+                    <p className="text-2xl font-bold text-gray-700">
+                        {user?.fullName}
+                    </p>
+                    <p className="text-lg font-medium text-gray-600 mt-1">
+                        <span className="bg-black text-white px-3 py-1 rounded-full uppercase text-sm">
+                            {getRoleDisplayName(user?.role, user?.career)}
+                        </span>
+                    </p>
                 </div>
 
-                {/* Filters & Actions */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                    <div className="flex items-center gap-4 bg-white p-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full md:w-auto">
-                        <NeoSelect
-                            label="Periodo"
-                            value={selectedPeriod}
-                            onChange={(val) => setSelectedPeriod(val === 'all' ? 'all' : Number(val))}
-                            options={periodOptions}
-                            className="w-full md:w-64"
-                        />
+                {/* Statistics Cards */}
+                <div className="mb-8">
+                    <h2 className="text-2xl font-black uppercase mb-6 tracking-tighter">
+                        Estado de tus Sílabos
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {statCards.map((stat, index) => {
+                            const Icon = stat.icon;
+                            return (
+                                <div
+                                    key={index}
+                                    className={`${stat.color} border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer`}
+                                    onClick={() => navigate('/syllabi')}
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className={`p-3 ${stat.color} border-3 ${stat.borderColor} rounded-lg`}>
+                                            <Icon className={`${stat.iconColor}`} size={32} strokeWidth={2.5} />
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-5xl font-black">{stat.value}</p>
+                                        </div>
+                                    </div>
+                                    <h3 className="text-lg font-black uppercase tracking-tight">
+                                        {stat.title}
+                                    </h3>
+                                </div>
+                            );
+                        })}
                     </div>
+                </div>
 
-                    {user?.role === 'COORDINATOR' && (
+                {/* Quick Actions */}
+                <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <h3 className="text-xl font-black uppercase mb-4 tracking-tighter">
+                        Accesos Rápidos
+                    </h3>
+                    <div className="flex flex-wrap gap-4">
                         <button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-neo-blue text-white font-black border-2 border-black hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all"
+                            onClick={() => navigate('/syllabi')}
+                            className="px-6 py-3 bg-neo-violet text-white font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
                         >
-                            <Plus size={24} strokeWidth={3} />
-                            NUEVO SÍLABO
+                            VER TODOS LOS SÍLABOS
                         </button>
-                    )}
-                </div>
-
-                {/* Table */}
-                <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-black text-white uppercase font-black text-sm tracking-widest">
-                            <tr>
-                                <th className="p-4 border-b-4 border-black w-24">Código</th>
-                                <th className="p-4 border-b-4 border-black">Curso</th>
-                                <th className="p-4 border-b-4 border-black">Periodo</th>
-                                <th className="p-4 border-b-4 border-black">Docente</th>
-                                <th className="p-4 border-b-4 border-black text-center">Estado</th>
-                                <th className="p-4 border-b-4 border-black text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y-2 divide-black">
-                            {filteredSyllabi.length > 0 ? (
-                                filteredSyllabi.map((syllabus) => (
-                                    <tr key={syllabus.id} className="hover:bg-neo-yellow transition-colors font-medium">
-                                        <td className="p-4 font-bold">{syllabus.courseCode}</td>
-                                        <td className="p-4">{syllabus.courseName}</td>
-                                        <td className="p-4 uppercase">{syllabus.academicPeriod?.name}</td>
-                                        <td className="p-4">{syllabus.professor?.fullName || '---'}</td>
-                                        <td className="p-4 text-center">
-                                            <span className={`inline-block px-3 py-1 rounded-sm border-2 border-black text-xs font-black uppercase ${getStatusColor(syllabus.workflowStatus)}`}>
-                                                {getStatusLabel(syllabus.workflowStatus, user?.role)}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                {/* ACTIONS */}
-
-                                                {/* 1. COORDINATOR ASSIGN: Only for CREATED status */}
-                                                {user?.role === 'COORDINATOR' && syllabus.workflowStatus === 'CREATED' && (
-                                                    <button
-                                                        onClick={() => handleAssignClick(syllabus)}
-                                                        className="p-2 border-2 border-black bg-neo-green text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                        title="Asignar al Profesor (Enviar)"
-                                                    >
-                                                        <Send size={18} />
-                                                    </button>
-                                                )}
-
-                                                {/* 2. COORDINATOR APPROVE/RETURN: Only for SUBMITTED status */}
-                                                {user?.role === 'COORDINATOR' && syllabus.workflowStatus === 'SUBMITTED' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleApproveClick(syllabus)}
-                                                            className="p-2 border-2 border-black bg-neo-green text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                            title="Aprobar Sílabo"
-                                                        >
-                                                            <Check size={18} />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleReturnClick(syllabus)}
-                                                            className="p-2 border-2 border-black bg-neo-red text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                            title="Observar y Devolver"
-                                                        >
-                                                            <RotateCcw size={18} />
-                                                        </button>
-                                                    </>
-                                                )}
-
-                                                {/* 3. COORDINATOR UPLOAD EXCEL: Always available or restricted? Usually early stages. */}
-                                                {user?.role === 'COORDINATOR' && (
-                                                    <button
-                                                        onClick={() => handleOpenUpload(syllabus.id)}
-                                                        className="p-2 border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                        title="Cargar Excel"
-                                                    >
-                                                        <FileSpreadsheet size={18} />
-                                                    </button>
-                                                )}
-
-                                                {/* 4. PROFESSOR EDIT */}
-                                                {user?.role === 'PROFESSOR' && (
-                                                    <button
-                                                        onClick={() => navigate(`/syllabus/${syllabus.id}/edit`)}
-                                                        className="p-2 border-2 border-black bg-neo-yellow text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                        title="Editar Sílabo"
-                                                    >
-                                                        <Pencil size={18} />
-                                                    </button>
-                                                )}
-
-                                                {/* VIEW PDF */}
-                                                <button
-                                                    onClick={() => handleViewPdf(syllabus.id)}
-                                                    className="p-2 border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                                                    title="Ver PDF"
-                                                >
-                                                    <Eye size={18} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={6} className="p-8 text-center text-gray-500 italic">
-                                        No se encontraron sílabos en este periodo.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                    </div>
                 </div>
             </div>
-
-            {/* Modals */}
-            <CreateSyllabusModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSuccess={handleCreateSuccess}
-            />
-
-            {uploadSyllabusId && (
-                <UploadExcelModal
-                    isOpen={isUploadExcelModalOpen}
-                    onClose={() => setIsUploadExcelModalOpen(false)}
-                    syllabusId={uploadSyllabusId}
-                    onSuccess={handleUploadSuccess}
-                />
-            )}
-
-            <ConfirmModal
-                isOpen={confirmModal.isOpen}
-                onClose={() => setConfirmModal({ isOpen: false, syllabus: null, action: null })}
-                onConfirm={handleConfirmAction}
-                title={modalContent.title}
-                message={modalContent.message}
-                confirmText={modalContent.confirmText}
-                isLoading={isProcessing}
-            />
         </div>
     );
 };
