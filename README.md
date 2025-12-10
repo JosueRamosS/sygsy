@@ -2,7 +2,7 @@
 
 **SYGSY** es una plataforma web moderna para la gestión, creación, revisión y aprobación de sílabos universitarios. Diseñada con un enfoque "Neobrutalista" para una experiencia de usuario clara y eficiente, permite a Coordinadores y Docentes colaborar en tiempo real.
 
-## 👥 Créditos
+## Créditos
 
 ### Autor
 *   **Josué Carlos Alberto Ramos Suyoc**
@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 Características Principales
+## Características Principales
 
 *   **Roles y Permisos:** Sistema seguro con roles de `COORDINATOR` (Administrador) y `PROFESSOR`.
 *   **Gestión de Sílabos:** Flujo de trabajo completo: Creación -> Asignación -> Envío -> Revisión -> Aprobación/Devolución.
@@ -21,7 +21,7 @@
 *   **Generación de Reportes:** Exportación de sílabos a PDF.
 *   **Personalización:** Interfaz adaptada al usuario con saludos personalizados y filtrado de contenido relevante.
 
-## 🛠️ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
 ### Backend
 *   **Java 17**
@@ -44,7 +44,7 @@
 
 ---
 
-## 💻 Guía de Despliegue Local
+## Guía de Despliegue Local
 
 Sigue estos pasos para clonar y ejecutar el proyecto en tu máquina local.
 
@@ -89,7 +89,7 @@ mvn spring-boot:run
 
 ---
 
-## 🧪 Datos de Prueba (Seed)
+## Datos de Prueba (Seed)
 
 El sistema incluye un script en Python (`generate_3_careers.py`) para poblar la base de datos con usuarios, carreras y sílabos de prueba.
 
@@ -111,7 +111,7 @@ Una vez ejecutado el script, puedes acceder con:
 
 ---
 
-## 📂 Estructura del Proyecto
+## Estructura del Proyecto
 
 *   `/src`: Código fuente del Backend (Java/Spring).
 *   `/frontend`: Código fuente del Frontend (React/Vite).
