@@ -22,10 +22,11 @@ Este proyecto ha sido desarrollado por:
 
 ### Backend
 *   **Java 17**
-*   **Spring Boot 3.x** (Web, Security, Data JPA)
+*   **Spring Boot 3.3.0** (Web, Security, Data JPA)
 *   **MySQL 8** (Persistencia de datos)
 *   **JWT (JSON Web Tokens)** (Autenticación segura)
 *   **Apache POI** (Procesamiento de archivos Excel)
+*   **OpenPDF** (Generación de Reportes PDF)
 
 ### Frontend
 *   **React 18** (TypeScript)
