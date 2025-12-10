@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from "../context/AuthContext";
 import { syllabusApi } from '../api/syllabusApi';
 import type { Syllabus } from '../api/syllabusApi';
@@ -9,15 +9,15 @@ import { BulkCreateSyllabusModal } from '../components/BulkCreateSyllabusModal';
 import { UploadExcelModal } from '../components/UploadExcelModal';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { NeoSelect } from '../components/ui/NeoSelect';
-import { LogOut, Plus, FileSpreadsheet, Eye, Pencil, Send, Check, RotateCcw, ChevronDown, Layers, File, Trash2 } from 'lucide-react';
+import { Plus, FileSpreadsheet, Eye, Pencil, Send, Check, RotateCcw, ChevronDown, Layers, File, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { getRoleDisplayName } from '../utils/roleUtils';
+
 
 type ModalAction = 'ASSIGN' | 'APPROVE' | 'RETURN' | 'DELETE';
 
 export const SyllabiPage = () => {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [syllabi, setSyllabi] = useState<Syllabus[]>([]);
     const [periods, setPeriods] = useState<AcademicPeriod[]>([]);

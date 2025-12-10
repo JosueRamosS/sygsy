@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { NeoSelect } from '../components/ui/NeoSelect';
-import { Plus, User as UserIcon, Shield, Briefcase } from 'lucide-react';
+import { Plus, Shield, Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getRoleDisplayName } from '../utils/roleUtils';
 
