@@ -39,9 +39,8 @@ public class DataInitializer implements CommandLineRunner {
         String adminUsername = "admin@ulasalle.edu.pe";
         String adminPassword = "admin123";
 
-        // CLEANUP: Force delete all users verify fresh state
-        log.info("Cleaning up all users for fresh seed...");
-        userRepository.deleteAll();
+        // CLEANUP: Removed for production to preserve users
+        // userRepository.deleteAll();
         // 1. ADMIN (Super Admin, no career scope)
         userRepository.findByUsername(adminUsername).ifPresentOrElse(
                 user -> {
