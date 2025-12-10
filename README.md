@@ -111,6 +111,11 @@ Una vez ejecutado el script, puedes acceder con:
 
 ---
 
+## Despliegue ☁️
+
+*   **Backend:** Railway (Dockerized Spring Boot)
+*   **Frontend:** Cloudflare Pages (Vite + React)
+
 ## Estructura del Proyecto
 
 *   `/src`: Código fuente del Backend (Java/Spring).
