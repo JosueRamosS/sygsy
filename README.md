@@ -122,3 +122,7 @@ Una vez ejecutado el script, puedes acceder con:
 *   `/frontend`: Código fuente del Frontend (React/Vite).
 *   `/frontend/public`: Assets estáticos (Logos, Favicons).
 *   `*.xlsx`: Plantillas y ejemplos para carga masiva de sílabos.
+
+## Video de prueba completa de SYGSY
+
+*  https://youtu.be/2Ts_soLbsR4?si=3QpdHrFVxZugyqbP
